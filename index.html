@@ -122,6 +122,9 @@
 
   footer { margin-top: 28px; text-align: center; font-size: 12.5px; color: var(--muted); }
   footer .host { font-family: var(--mincho); font-size: 14px; color: var(--ink); }
+  /* 公式LINEの友だち追加バナー（スマホはタップで LINE が開く・PC は画像内の QR）。2026-09-30 */
+  footer .line-bn { display: block; max-width: 480px; margin: 0 auto 20px; }
+  footer .line-bn img { width: 100%; height: auto; display: block; }
 
   .sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
             padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
@@ -228,6 +231,7 @@
   </section>
 
   <footer>
+    <a class="line-bn" href="https://lin.ee/8lqM74x"><picture><source srcset="assets/line-banner.webp" type="image/webp"><img src="assets/line-banner.jpg" width="1280" height="460" alt="公式LINE 仲里彩瞳 友だち追加はこちら" loading="lazy"></picture></a>
     <div class="host">仲里 彩瞳（AYA）</div>
     <div>フェムケア アドバイザー</div>
   </footer>
