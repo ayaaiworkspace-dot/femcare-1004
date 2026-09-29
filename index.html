@@ -115,6 +115,8 @@
   .msg.ok { background: #f3eef8; border: 1px solid var(--lav-deep); }
   .msg.ok h3 { margin: 0 0 6px; font: 600 18px/1.5 var(--mincho); color: var(--iris-ink); }
   .msg.ok p { margin: 6px 0 0; }
+  .msg.ok p.spam { margin-top: 12px; padding: 10px 12px; background: #fff; border-left: 4px solid var(--gold); border-radius: 8px; }
+  .msg.ok .nw { white-space: nowrap; }
   .msg.ng { background: #fbeef1; border: 1px solid #efc9d3; color: var(--ng); }
   .msg.dev { background: #fff8e6; border: 1px solid var(--gold-soft); color: #7a5c1f; }
 
@@ -217,7 +219,8 @@
     <div class="msg ok" id="m-ok" hidden role="status">
       <h3>お申し込みを受け付けました</h3>
       <p><strong id="m-mail"></strong> 宛に、<span id="m-what">Zoom のリンクをお送りしました</span>。</p>
-      <p>数分たっても届かないときは、迷惑メールのフォルダもご確認ください。</p>
+      <p class="spam"><strong>メールが「迷惑メール」のフォルダに入ることがあります。</strong>受信トレイに見当たらないときは、迷惑メール（スパム）のフォルダもご確認ください。差出人の名前は<span class="nw">「仲里 彩瞳（AYA）」</span>です。</p>
+      <p>迷惑メールに入っていたときは、「迷惑メールではない」に移していただくと、前日のご案内も受信トレイに届きやすくなります。</p>
     </div>
     <div class="msg ng" id="m-ng" hidden role="alert">送信できませんでした。通信の状態をご確認のうえ、もう一度お試しください。</div>
     <div class="msg ng" id="m-closed" hidden role="status">この説明会の受付は終了しました。</div>
