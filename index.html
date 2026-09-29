@@ -85,6 +85,19 @@
   .ages input:checked + label { background: var(--iris); border-color: var(--iris); color: #fff; }
   .ages input:focus-visible + label { box-shadow: 0 0 0 3px rgba(140, 107, 174, .3); }
 
+  /* 参加日時（チェックボックス）。年代と同じ札の形で、日時の文字が長いので1列に並べる */
+  .sessions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .sessions input { position: absolute; opacity: 0; pointer-events: none; }
+  .sessions label { position: relative; margin: 0; padding: 11px 12px 11px 44px; font-weight: 500; font-size: 15px; line-height: 1.5;
+                    background: #fff; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; transition: all .15s;
+                    overflow-wrap: anywhere; }
+  .sessions label::before { content: ""; position: absolute; left: 14px; top: 50%; width: 18px; height: 18px; margin-top: -9px;
+                            border: 1.5px solid var(--iris); border-radius: 4px; background: #fff; }
+  .sessions input:checked + label { background: var(--iris); border-color: var(--iris); color: #fff; }
+  .sessions input:checked + label::before { border-color: #fff; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10'%3E%3Cpath d='M1 5l3.5 3.5L11 1.5' fill='none' stroke='%238c6bae' stroke-width='2'/%3E%3C/svg%3E") no-repeat center; }
+  .sessions input:focus-visible + label { box-shadow: 0 0 0 3px rgba(140, 107, 174, .3); }
+  .field.bad .sessions label { border-color: var(--ng); }
+
   .privacy { margin: 6px 0 14px; padding: 12px 14px; font-size: 13px; line-height: 1.75; color: var(--muted);
              background: var(--cream); border: 1px dashed var(--line); border-radius: 10px; }
   .field .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; cursor: pointer; }
@@ -179,11 +192,19 @@
         <p class="err" hidden></p>
       </div>
 
+      <div class="field" data-k="sessions">
+        <span class="label" id="sessions-l">参加日時<span class="req">必須</span></span>
+        <!-- 中身は下の SESSIONS から描く（回を足すときは SESSIONS と GAS の SESSIONS に1行ずつ） -->
+        <div class="sessions" id="sessions-box" role="group" aria-labelledby="sessions-l"></div>
+        <p class="hint">ご参加になる日時にチェックを入れてください。</p>
+        <p class="err" hidden></p>
+      </div>
+
       <!-- 人には見えない欄。機械の自動送信だけが埋める -->
       <div class="hp" aria-hidden="true"><label>website<input name="website" tabindex="-1" autocomplete="off"></label></div>
 
       <div class="privacy" id="privacy">
-        お預かりするお名前・メールアドレス・年代は、この説明会のご案内（Zoom のリンク）と、当日の運営のご連絡にだけ使います。ほかの目的には使わず、第三者へお渡しすることもありません。消してほしいときは、届いたメールにご返信ください。
+        お預かりするお名前・メールアドレス・年代・参加日時は、この説明会のご案内（Zoom のリンク）と、当日の運営のご連絡にだけ使います。ほかの目的には使わず、第三者へお渡しすることもありません。消してほしいときは、届いたメールにご返信ください。
       </div>
       <div class="field" data-k="consent">
         <label class="consent"><input type="checkbox" id="consent" name="consent" aria-describedby="privacy">上記に同意して申し込みます</label>
@@ -215,13 +236,31 @@
 (function () {
   'use strict';
   /* GAS ウェブアプリの URL（S4 のデプロイで差し込む）。【】が残っているあいだは送信しない */
-  var GAS_URL = 'https://script.google.com/macros/s/【GAS_WEBAPP_ID】/exec';
+  var GAS_URL = 'https://script.google.com/macros/s/AKfycbxnMTF5ezSFJiBj5Kxhvwvp_i6hBPg628267jBGE1e5MaPuL2FkYbThPpLruVkeXkbG/exec';
   var GAS_READY = GAS_URL.indexOf('【') < 0;
   /* 受付の締め切り（GAS の CONFIG.CLOSE_AT と同じ値にする） */
   var CLOSE_AT = new Date('2026-10-04T20:00:00+09:00');
+  /* 参加日時の回（GAS の SESSIONS と同じ中身にする。check.mjs が突き合わせる）。id は送信される値、label は画面の文字 */
+  var SESSIONS = [
+    { id: '20261004-2000', label: '2026年10月4日（日）20:00〜' }
+  ];
 
   var $ = function (id) { return document.getElementById(id); };
   var form = $('f'), send = $('send');
+
+  /* 参加日時のチェックボックスを SESSIONS から描く */
+  SESSIONS.forEach(function (s, i) {
+    var input = document.createElement('input');
+    input.type = 'checkbox';
+    input.name = 'session';
+    input.id = 's' + i;
+    input.value = s.id;
+    var label = document.createElement('label');
+    label.htmlFor = input.id;
+    label.textContent = s.label;
+    $('sessions-box').appendChild(input);
+    $('sessions-box').appendChild(label);
+  });
 
   function setErr(k, text) {
     var box = form.querySelector('.field[data-k="' + k + '"]');
@@ -238,6 +277,7 @@
       email: $('email').value.trim(),
       email2: $('email2').value.trim(),
       age: age ? age.value : '',
+      sessions: Array.prototype.map.call(form.querySelectorAll('input[name="session"]:checked'), function (x) { return x.value; }),
       consent: $('consent').checked,
       website: form.website.value
     };
@@ -250,6 +290,7 @@
     setErr('email', mailRe.test(v.email) ? '' : 'メールアドレスの形をご確認ください。');
     setErr('email2', v.email2 && v.email2.toLowerCase() === v.email.toLowerCase() ? '' : '上と同じメールアドレスをご入力ください。');
     setErr('age', v.age ? '' : '年代をお選びください。');
+    setErr('sessions', v.sessions.length ? '' : '参加日時にチェックを入れてください。');
     setErr('consent', v.consent ? '' : '内容をご確認のうえ、チェックを入れてください。');
     form.querySelectorAll('.field.bad').forEach(function () { ok = false; });
     return ok;
@@ -266,6 +307,7 @@
     name: ['name', 'お名前をご確認ください。'],
     email: ['email', 'メールアドレスをご確認ください。'],
     age: ['age', '年代をお選びください。'],
+    sessions: ['sessions', '参加日時をお選びください。'],
     consent: ['consent', '同意のチェックをご確認ください。']
   };
 
@@ -284,7 +326,7 @@
     fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },   /* プリフライトを起こさない */
-      body: JSON.stringify({ name: v.name, email: v.email, age: v.age, consent: true, website: v.website })
+      body: JSON.stringify({ name: v.name, email: v.email, age: v.age, sessions: v.sessions, consent: true, website: v.website })
     }).then(function (r) { return r.json(); }).then(function (r) {
       if (r && r.ok) {
         form.hidden = true;
