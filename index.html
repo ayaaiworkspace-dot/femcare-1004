@@ -360,6 +360,11 @@
       sticky.classList.toggle('off', es[0].isIntersecting);
     }, { threshold: 0.05 }).observe($('apply'));
   }
+
+  if (/[?&]from=fb(&|$)/.test(location.search)) {
+    var lineBn = document.querySelector('.line-bn');
+    if (lineBn) { lineBn.parentNode.removeChild(lineBn); }
+  }
 })();
 </script>
 </body>
